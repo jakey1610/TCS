@@ -1,0 +1,31 @@
+\textit{\textbf{Proof of Savitch's Theorem}}\\
+Savitch's Theorem states that for any $f(n) \geq log(n)$,\\ $NPSPACE[f(n)] \subseteq PSPACE[f(n)^2] $ \\
+Suppose $T$ is an non-deterministic Turing Machine which requires at most $f(n)$ space on any input for $f \geq log(n)$. We will go on to describe a deterministic Turing Machine that requires $O(f(n)^2)$ space which behaves the same way as $T$. We define the procedure CANYIELD, given two configurations $c_1,c_2 $ of $T$, and an integer $t$, it accepts if there is a sequence of length $\leq t$ which T can take starting at $c_1$ and ending at $c_2$. \\
+\textbf{CANYIELD}$(c_1,c_2,t)$
+\begin{algorithmic}
+\IF {$t==0$}
+	\STATE Accept if $c_1 = c_2$
+\ELSIF {$t==1$}
+	\STATE Accept if T can take a single step from $c_1$ to $c_2$.
+\ELSE
+	\FOR {all possible configurations $c_m$ of $T$}
+		\STATE Accept if CANYIELD$(c_1,c_m,\floor{t/2})$ and CANYIELD$(c_m,c_2,\ceil{t/2})$ both accept
+	\ENDFOR
+\ENDIF \\
+Reject
+\end{algorithmic}
+WLOG, we can assume that before we reach an accepting configuration of T, it writes 0's on each cell of the tape it used and moves the tapehead to the far left of the tape. Call the accepting configuration $c_{acc}$. Let $c$ be the number of states of $T$ and the number of symbols in the tape alphabet of $T$.  $\Rightarrow $ there are at most $c^{f(n)}$ steps on any input on which it terminates: otherwise would never terminate. Let $c_{start}$ be the start configuration of $T$ on input $w$. $\Rightarrow $ $T$ accepts $w$ $\iff $ CANYIELD$(c_{start},c_{acc}, c^{f(n)})$ accepts.\\
+We can see that this algorithm takes at most $O(f(n)^2)$ space.\\
+If $f(n)$ is computable with $O(f(n)^2$ space, then we can compute $c^{f(n)} $ before our first call to CANYIELD. Otherwise, we can add a size parameter $s$ to CANYIELD; iterate only over configurations that use $\leq s $ space. Define $c_{acc,s} $ to be the configuration of $T$ that is the accept state followed by $s$ zeros. We can model $T$ using the following algorithm: \\
+\begin{algorithmic}
+\FOR {$i=1,2,3,...$}
+	\IF {CANYIELD$(c_1,c_G,c^{i+1},i+1)$ accepts}
+		\STATE Accept if $c_G = c_{acc,i+1}$
+		\STATE $i\gets i+1$
+	\ENDIF
+	Reject
+\ENDFOR
+\end{algorithmic}
+The above algorithm accepts if CANYIELD tells us we can reach an accept state, and rejects if we reach an i such that $T$ cannot yield any configuration of length $i+1$. As $T$ never uses more than $f(n)$ space, we will reject once $i=f(n)+1$, which can only happen when $T$ never reaches an accept state of length $f(n)$, so we know it must reject.\\
+This proves Savitch's Theorem by a constructive proof $\square$
+\textit{\textbf{Continuing from before proof...}}\\
